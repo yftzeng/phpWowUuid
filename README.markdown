@@ -11,7 +11,7 @@ PHP 5.3+
 ### Standalone WowLog library
 
 ```
-include __DIR__.'/Uuid.php';
+include __DIR__.'/src/Wow/Util/Uuid.php';
 
 use \Wow\Util\Uuid as Uuid;
 
