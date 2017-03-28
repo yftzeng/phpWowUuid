@@ -31,6 +31,8 @@ class Uuid
     // Change to time() * 1000 of new project start
     private static $_epoch_offset = 1490725807000;
 
+    private static $_alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
     /**
      * UUID version 1
      *
@@ -84,6 +86,60 @@ class Uuid
         );
     }
 
+     /**
+     * UUID version 1 ordered
+     *
+     * @param boolean $dashes format with dashed or not
+     *
+     * @return string
+     */
+    public static function v1_order($dashes = true)
+    {
+        if ($dashes) {
+            $format = '%04x-%s-%s-%02x%02x-%s';
+        } else {
+            $format = '%04x%s%s%02x%02x%s';
+
+        }
+
+        if (isset($_SERVER['SERVER_ADDR'])) {
+            $node = substr(md5($_SERVER['SERVER_ADDR']), 0, 12);
+        } else {
+            $characters = 'abcdef0123456789';
+            $node = '';
+            for ($p = 0; $p < 12; $p++) {
+                $node .= $characters[mt_rand(0, 15)];
+            }
+        }
+
+        $tp = gettimeofday();
+        $time = ($tp['sec'] * 10000000) + ($tp['usec'] * 10) + 0x01B21DD213814000;
+
+        $uuid_low = sprintf('%08x', $time & 0xffffffff);
+        $uuid_mid = sprintf('%04x', ($time >> 32) & 0xffff);
+        $uuid_hi  = sprintf('%04x', ($time >> 48) & 0x0fff);
+
+        $timeHi = hexdec($uuid_hi) & 0x0fff;
+        $timeHi &= ~(0xf000);
+        $timeHi |= 1 << 12;
+
+        $clockSeq = mt_rand(0, 1 << 14);
+        $clockSeqHi = ($clockSeq >> 8) & 0x3f;
+        $clockSeqHi &= ~(0xc0);
+        $clockSeqHi |= 0x80;
+        $clockSeq &= 0xff;
+
+        return sprintf(
+            $format,
+            $timeHi,
+            $uuid_mid,
+            $uuid_low,
+            $clockSeqHi,
+            $clockSeq,
+            $node
+        );
+    }
+
     /**
      * UUID version 4
      *
@@ -112,7 +168,7 @@ class Uuid
     }
 
     /**
-     * Twitter Snowflake implementation
+     * Twitter Snowflake like implementation
      *
      * 41-bits : Timestamp (millisecond precision, bespoke epoch)
      * 10-bits : Machine ID
@@ -151,6 +207,32 @@ class Uuid
         $seq = decbin((2 << 10) - 1 + (mt_rand(1, (2 << 10) - 1)));
 
         return bindec($time.$datacenter_id.$machine_id.$seq);
+    }
+
+    /**
+     * Twitter Snowflake like implementation v4
+     *
+     * 41-bits : Timestamp (millisecond precision, bespoke epoch)
+     * 22-bits : Sequence number
+     *
+     * @return string
+     */
+    public static function snowflake_v4()
+    {
+        /*
+         * 41-bits : Timestamp
+         */
+        $time = decbin(
+            (2 << 39)
+            - 1 + floor(microtime(true) * 1000) - self::$_epoch_offset
+        );
+
+        /*
+         * 22-bits : Sequence number
+         */
+        $seq = decbin((2 << 20) - 1 + (mt_rand(1, (2 << 20) - 1)));
+
+        return bindec($time.$seq);
     }
 
 }
