@@ -11,8 +11,6 @@
  * @link     https://github.com/yftzeng/phpWowUuid
  */
 
-namespace Wow\Util;
-
 /**
  * PHP WowUuid
  *
@@ -25,13 +23,18 @@ namespace Wow\Util;
  * @link     https://github.com/yftzeng/phpWowUuid
  */
 
+namespace Wow\Util;
+
 class Uuid
 {
 
+    // Change to time() * 1000 of new project start
+    private static $_epoch_offset = 1490725807000;
+
     /**
-     * @param boolean $dashes format with dashed or not
+     * UUID version 1
      *
-     * @comment UUID version 1
+     * @param boolean $dashes format with dashed or not
      *
      * @return string
      */
@@ -51,7 +54,6 @@ class Uuid
             for ($p = 0; $p < 12; $p++) {
                 $node .= $characters[mt_rand(0, 15)];
             }
-
         }
 
         $tp = gettimeofday();
@@ -83,9 +85,9 @@ class Uuid
     }
 
     /**
-     * @param boolean $dashes format with dashed or not
+     * UUID version 4
      *
-     * @comment UUID version 4
+     * @param boolean $dashes format with dashed or not
      *
      * @return string
      */
@@ -107,6 +109,48 @@ class Uuid
             mt_rand(0, 0x3fff) | 0x8000,
             substr($random_pseudo_bytes, 12)
         );
+    }
+
+    /**
+     * Twitter Snowflake implementation
+     *
+     * 41-bits : Timestamp (millisecond precision, bespoke epoch)
+     * 10-bits : Machine ID
+     * 12-bits : Sequence number
+     *
+     * @param int $datacenter_id datacenter unique id
+     * @param int $machine_id    machine unique id
+     *
+     * @return string
+     */
+    public static function snowflake($datacenter_id, $machine_id)
+    {
+        /*
+         * 41-bits : Timestamp
+         */
+        $time = decbin(
+            (2 << 39)
+            - 1 + floor(microtime(true) * 1000) - self::$_epoch_offset
+        );
+
+        /*
+         * 4-bits : Datacenter ID
+         */
+        $datacenter_id = decbin(
+            (2 << 2) - 1 + $datacenter_id
+        );
+
+        /*
+         * 6-bits : Machine ID
+         */
+        $machine_id = decbin((2 << 4) - 1 + $machine_id);
+
+        /*
+         * 12-bits : Sequence number
+         */
+        $seq = decbin((2 << 10) - 1 + (mt_rand(1, (2 << 10) - 1)));
+
+        return bindec($time.$datacenter_id.$machine_id.$seq);
     }
 
 }
