@@ -17,6 +17,10 @@ use \Wow\Util\Uuid as Uuid;
 
 $uuid1 = Uuid::v1();
 $uuid4 = Uuid::v4();
+$uuid1_order = Uuid::v1_order(false);
+$snowflake = Uuid::snowflake(1, 1);
+$snowflake_random = Uuid::snowflake_random();
+$snowflake_order = Uuid::snowflake_order(1, 1);
 ```
 
 ### Work with Composer
@@ -45,6 +49,10 @@ use \Wow\Util\Uuid as Uuid;
 
 $uuid1 = Uuid::v1();
 $uuid4 = Uuid::v4();
+$uuid1_order = Uuid::v1_order(false);
+$snowflake = Uuid::snowflake(1, 1);
+$snowflake_random = Uuid::snowflake_random();
+$snowflake_order = Uuid::snowflake_order(1, 1);
 ```
 
 ## License
