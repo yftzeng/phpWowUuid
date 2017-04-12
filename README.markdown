@@ -1,6 +1,6 @@
 # phpWowUuid
 
-Wow! Uuid for PHP. Simple and Fast. Compliance with RFC 4122, but only UUID version 1 and version 4.
+Wow! Uuid for PHP. Simple and Fast. Compliance with RFC 4122, but only UUID version 1 and version 4. And support snowflake-like algorithms.
 
 ## Requirement
 
