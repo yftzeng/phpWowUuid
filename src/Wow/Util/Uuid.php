@@ -29,9 +29,16 @@ class Uuid
 {
 
     // Change to time() * 1000 of new project start
-    private static $_epoch_offset = 1490725807000;
+    private static $_epoch_offset = 1491981505000;
 
     private static $_alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    private static $_machineid_bits = 6;
+    private static $_datacenterid_bits = 4;
+    private static $_sequence_bits = 12;
+
+    private static $_last_timestamp = 1;
+    private static $_seq = 1;
 
     /**
      * UUID version 1
@@ -170,69 +177,88 @@ class Uuid
     /**
      * Twitter Snowflake like implementation
      *
-     * 41-bits : Timestamp (millisecond precision, bespoke epoch)
-     * 10-bits : Machine ID
-     * 12-bits : Sequence number
+     * @param int $datacenter_id datacenter unique id
+     * @param int $machine_id    machine unique id
+     *
+     * @return int
+     */
+    public static function snowflake($datacenter_id, $machine_id)
+    {
+        $datacenter_id = (int)$datacenter_id;
+        $machine_id  = (int)$machine_id;
+
+        if ($datacenter_id > ( -1 ^ ( -1 << self::$_datacenterid_bits )) || $datacenter_id < 0) {
+            return false;
+        }
+        if ($machine_id > ( -1 ^ ( -1 << self::$_machineid_bits )) || $machine_id < 0) {
+            return false;
+        }
+
+        $seq = mt_rand(1, (2 << (self::$_sequence_bits-1) - 1));
+        $timestamp = floor(microtime(true) * 1000);
+
+        return (( $timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
+            ( $datacenter_id << self::$_datacenterid_bits) |
+            ( $machine_id << self::$_machineid_bits) |
+            $seq;
+    }
+
+    /**
+     * Twitter Snowflake like implemented by random
+     *
+     * @return int
+     */
+    public static function snowflake_random()
+    {
+        $seq = mt_rand(1, (2 << (self::$_sequence_bits + self::$_machineid_bits + self::$_datacenterid_bits -1) - 1));
+        $timestamp = floor(microtime(true) * 1000);
+
+        return (( $timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
+            $seq;
+    }
+
+    /**
+     * Twitter Snowflake like implemented by order
      *
      * @param int $datacenter_id datacenter unique id
      * @param int $machine_id    machine unique id
      *
-     * @return string
-     */
-    public static function snowflake($datacenter_id, $machine_id)
-    {
-        /*
-         * 41-bits : Timestamp
-         */
-        $time = decbin(
-            (2 << 39)
-            - 1 + floor(microtime(true) * 1000) - self::$_epoch_offset
-        );
-
-        /*
-         * 4-bits : Datacenter ID
-         */
-        $datacenter_id = decbin(
-            (2 << 2) - 1 + $datacenter_id
-        );
-
-        /*
-         * 6-bits : Machine ID
-         */
-        $machine_id = decbin((2 << 4) - 1 + $machine_id);
-
-        /*
-         * 12-bits : Sequence number
-         */
-        $seq = decbin((2 << 10) - 1 + (mt_rand(1, (2 << 10) - 1)));
-
-        return bindec($time.$datacenter_id.$machine_id.$seq);
-    }
-
-    /**
-     * Twitter Snowflake like implementation v4
-     *
-     * 41-bits : Timestamp (millisecond precision, bespoke epoch)
-     * 22-bits : Sequence number
+     * Ref: https://github.com/golangfan/phpsnowflake
      *
      * @return string
      */
-    public static function snowflake_v4()
+    public static function snowflake_order($datacenter_id, $machine_id)
     {
-        /*
-         * 41-bits : Timestamp
-         */
-        $time = decbin(
-            (2 << 39)
-            - 1 + floor(microtime(true) * 1000) - self::$_epoch_offset
-        );
+        do {
+            $timestamp = floor(microtime(true) * 1000);
+        } while ($timestamp < self::$_last_timestamp);
 
-        /*
-         * 22-bits : Sequence number
-         */
-        $seq = decbin((2 << 20) - 1 + (mt_rand(1, (2 << 20) - 1)));
+        $datacenter_id = (int)$datacenter_id;
+        $machine_id  = (int)$machine_id;
 
-        return bindec($time.$seq);
+        if ($datacenter_id > ( -1 ^ ( -1 << self::$_datacenterid_bits )) || $datacenter_id < 0) {
+            return false;
+        }
+        if ($machine_id > ( -1 ^ ( -1 << self::$_machineid_bits )) || $machine_id < 0) {
+            return false;
+        }
+
+        if ($timestamp === self::$_last_timestamp) {
+            self::$_seq = self::$_seq + 1 & ( -1 ^ ( -1 << self::$_sequence_bits));
+            if (self::$_seq === 1) {
+                do {
+                    $timestamp = floor(microtime(true) * 1000);
+                } while ($timestamp < self::$_last_timestamp);
+            }
+        } else {
+            self::$_seq = 1;
+        }
+        self::$_last_timestamp = $timestamp;
+
+        return (( $timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
+            ( $datacenter_id << self::$_datacenterid_bits) |
+            ( $machine_id << self::$_machineid_bits) |
+            ( self::$_seq << self::$_sequence_bits);
     }
 
 }
