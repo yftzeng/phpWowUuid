@@ -106,7 +106,6 @@ class Uuid
             $format = '%04x-%s-%s-%02x%02x-%s';
         } else {
             $format = '%04x%s%s%02x%02x%s';
-
         }
 
         if (isset($_SERVER['SERVER_ADDR'])) {
@@ -187,19 +186,19 @@ class Uuid
         $datacenter_id = (int)$datacenter_id;
         $machine_id  = (int)$machine_id;
 
-        if ($datacenter_id > ( -1 ^ ( -1 << self::$_datacenterid_bits )) || $datacenter_id < 0) {
+        if ($datacenter_id > (-1 ^ (-1 << self::$_datacenterid_bits)) || $datacenter_id < 0) {
             return false;
         }
-        if ($machine_id > ( -1 ^ ( -1 << self::$_machineid_bits )) || $machine_id < 0) {
+        if ($machine_id > (-1 ^ (-1 << self::$_machineid_bits)) || $machine_id < 0) {
             return false;
         }
 
         $seq = mt_rand(1, (2 << (self::$_sequence_bits-1) - 1));
         $timestamp = floor(microtime(true) * 1000);
 
-        return (( $timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
-            ( $datacenter_id << self::$_datacenterid_bits) |
-            ( $machine_id << self::$_machineid_bits) |
+        return (($timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
+            ($datacenter_id << self::$_datacenterid_bits) |
+            ($machine_id << self::$_machineid_bits) |
             $seq;
     }
 
@@ -213,7 +212,7 @@ class Uuid
         $seq = mt_rand(1, (2 << (self::$_sequence_bits + self::$_machineid_bits + self::$_datacenterid_bits -1) - 1));
         $timestamp = floor(microtime(true) * 1000);
 
-        return (( $timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
+        return (($timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
             $seq;
     }
 
@@ -236,15 +235,15 @@ class Uuid
         $datacenter_id = (int)$datacenter_id;
         $machine_id  = (int)$machine_id;
 
-        if ($datacenter_id > ( -1 ^ ( -1 << self::$_datacenterid_bits )) || $datacenter_id < 0) {
+        if ($datacenter_id > (-1 ^ (-1 << self::$_datacenterid_bits)) || $datacenter_id < 0) {
             return false;
         }
-        if ($machine_id > ( -1 ^ ( -1 << self::$_machineid_bits )) || $machine_id < 0) {
+        if ($machine_id > (-1 ^ (-1 << self::$_machineid_bits)) || $machine_id < 0) {
             return false;
         }
 
         if ($timestamp === self::$_last_timestamp) {
-            self::$_seq = self::$_seq + 1 & ( -1 ^ ( -1 << self::$_sequence_bits));
+            self::$_seq = self::$_seq + 1 & (-1 ^ (-1 << self::$_sequence_bits));
             if (self::$_seq === 1) {
                 do {
                     $timestamp = floor(microtime(true) * 1000);
@@ -255,10 +254,9 @@ class Uuid
         }
         self::$_last_timestamp = $timestamp;
 
-        return (( $timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
-            ( $datacenter_id << self::$_datacenterid_bits) |
-            ( $machine_id << self::$_machineid_bits) |
-            ( self::$_seq << self::$_sequence_bits);
+        return (($timestamp - self::$_epoch_offset) << (self::$_datacenterid_bits + self::$_machineid_bits + self::$_sequence_bits)) |
+            ($datacenter_id << self::$_datacenterid_bits) |
+            ($machine_id << self::$_machineid_bits) |
+            (self::$_seq << self::$_sequence_bits);
     }
-
 }
