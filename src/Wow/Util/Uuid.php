@@ -29,9 +29,7 @@ class Uuid
 {
 
     // Change to time() * 1000 of new project start
-    private static $_epoch_offset = 1491981505000;
-
-    private static $_alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    private static $_epoch_offset = 1517260282000;
 
     private static $_machineid_bits = 6;
     private static $_datacenterid_bits = 4;
@@ -176,12 +174,12 @@ class Uuid
     /**
      * Twitter Snowflake like implementation
      *
-     * @param int $datacenter_id datacenter unique id
      * @param int $machine_id    machine unique id
+     * @param int $datacenter_id datacenter unique id
      *
      * @return int
      */
-    public static function snowflake($datacenter_id, $machine_id)
+    public static function snowflake($machine_id, $datacenter_id = 1)
     {
         $datacenter_id = (int)$datacenter_id;
         $machine_id  = (int)$machine_id;
@@ -219,14 +217,14 @@ class Uuid
     /**
      * Twitter Snowflake like implemented by order
      *
-     * @param int $datacenter_id datacenter unique id
      * @param int $machine_id    machine unique id
+     * @param int $datacenter_id datacenter unique id
      *
      * Ref: https://github.com/golangfan/phpsnowflake
      *
      * @return string
      */
-    public static function snowflake_order($datacenter_id, $machine_id)
+    public static function snowflake_order($machine_id, $datacenter_id = 1)
     {
         do {
             $timestamp = floor(microtime(true) * 1000);
