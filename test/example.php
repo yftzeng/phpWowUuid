@@ -11,35 +11,38 @@ echo "### Value test\n";
 echo "################################\n";
 
 $value = Uuid::v1();
-echo "Uuid::v1()                 : len = " . strlen($value) . " : " . $value . "\n";
+echo "Uuid::v1()                               : len = " . strlen($value) . " : " . $value . "\n";
 
 $value = Uuid::v1_order();
-echo "Uuid::v1_order()           : len = " . strlen($value) . " : " . $value . "\n";
+echo "Uuid::v1_order()                         : len = " . strlen($value) . " : " . $value . "\n";
 
 $value = Uuid::v1_order(false);
-echo "Uuid::v1_order(false)      : len = " . strlen($value) . " : " . $value . "\n";
+echo "Uuid::v1_order(false)                    : len = " . strlen($value) . " : " . $value . "\n";
+
+$value = Uuid::v1_short('test', false);
+echo "Uuid::v1_short('test', false)            : len = " . strlen($value) . " : " . $value . "\n";
 
 $value = Uuid::v4();
-echo "Uuid::v4()                 : len = " . strlen($value) . " : " . $value . "\n";
+echo "Uuid::v4()                               : len = " . strlen($value) . " : " . $value . "\n";
 
 $value = Uuid::snowflake_random();
-echo "Uuid::snowflake_random()   : len = " . strlen($value) . " : " . $value . "\n";
+echo "Uuid::snowflake_random()                 : len = " . strlen($value) . " : " . $value . "\n";
 
 $value = Uuid::snowflake(1, 1);
-echo "Uuid::snowflake(1, 1)      : len = " . strlen($value) . " : " . $value . "\n";
+echo "Uuid::snowflake(1, 1)                    : len = " . strlen($value) . " : " . $value . "\n";
 
 $value = uniqid(true);
-echo "uniqid(true)               : len = " . strlen($value) . " : " . $value . "\n";
+echo "uniqid(true)                             : len = " . strlen($value) . " : " . $value . "\n";
 
 $value = Uuid::snowflake_order(1,1);
-echo "Uuid::snowflake_order(1,1) : len = " . strlen($value) . " : " . $value . "\n";
+echo "Uuid::snowflake_order(1,1)               : len = " . strlen($value) . " : " . $value . "\n";
 
 echo "################################\n";
 echo "### Order test\n";
 echo "################################\n";
 
 $index = 0;
-$loop = 99999;
+$loop = 999999;
 $flag = true;
 
 echo "[ERROR] Uuid::v1() is not ordered\n";

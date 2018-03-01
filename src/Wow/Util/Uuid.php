@@ -29,7 +29,7 @@ class Uuid
 {
 
     // Change to time() * 1000 of new project start
-    private static $_epoch_offset = 1517260282000;
+    private static $_epoch_offset = 1519938850000;
 
     private static $_machineid_bits = 6;
     private static $_datacenterid_bits = 4;
@@ -142,6 +142,24 @@ class Uuid
             $clockSeq,
             $node
         );
+    }
+
+     /**
+     * UUID version 1 encoded by Hashids
+     *
+     * @param string $hash_key Hash key for Hashids
+     * @param boolean $dashes format with dashed or not
+     *
+     * @return string
+     */
+    public static function v1_short($hash_key, $dashes = true)
+    {
+        $uuid = self::v1_order($dashes);
+        if (class_exists('\Hashids\Hashids')) {
+            $hashids = new \Hashids\Hashids($hash_key);
+            $uuid = $hashids->encode(array_values(unpack('L*', pack('h*', $uuid))));
+        }
+        return $uuid;
     }
 
     /**
